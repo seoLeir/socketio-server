@@ -1,0 +1,7 @@
+socket:
+  port: 9000
+  host: localhost
+
+spring:
+  application:
+    name: socketio
