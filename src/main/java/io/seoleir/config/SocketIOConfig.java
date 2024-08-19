@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class SocketIOConfig {
+
     @Value("${socket.host}")
     private String socketHost;
 

@@ -1,5 +1,5 @@
 socket:
-  port: 9000
+  port: 8008
   host: localhost
 
 spring:

@@ -1,6 +1,6 @@
 package io.seoleir.socket;
 
-import io.seoleir.io.SocketModule;
+import com.corundumstudio.socketio.SocketIOServer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SocketRunner implements CommandLineRunner {
 
-    private final SocketModule socketModule;
+    private final SocketIOServer server;
 
     @Override
     public void run(String... args) throws Exception {
-        socketModule.startServer();
+        server.startAsync();
     }
 }
