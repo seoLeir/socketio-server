@@ -1,15 +1,14 @@
 package io.seoleir.config;
 
-import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOServer;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 @Slf4j
-@Component
+@Configuration
 public class SocketIOConfig {
 
     @Value("${socket.host}")
@@ -22,7 +21,7 @@ public class SocketIOConfig {
 
     @Bean
     public SocketIOServer socketIOServer() {
-        Configuration config = new Configuration();
+        com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(socketHost);
         config.setPort(socketPort);
         server = new SocketIOServer(config);

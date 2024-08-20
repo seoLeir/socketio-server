@@ -1,6 +1,9 @@
 socket:
-  port: 8008
+  port: 9009
   host: localhost
+
+server:
+  port: 9000
 
 spring:
   application:

@@ -6,6 +6,7 @@ import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.DataListener;
 import io.seoleir.data.Message;
+import io.seoleir.holder.ActiveClientConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,11 @@ public class UserSocketIO {
 
     private final SocketIOServer socketIOServer;
 
-    public UserSocketIO(SocketIOServer socketIOServer) {
+    private final ActiveClientConcurrentHashMap hashMap;
+
+    public UserSocketIO(SocketIOServer socketIOServer, ActiveClientConcurrentHashMap hashMap) {
         this.socketIOServer = socketIOServer;
+        this.hashMap = hashMap;
 
         SocketIONamespace executorNameSpace = this.socketIOServer.addNamespace("/user");
         executorNameSpace.addConnectListener(this::onConnect);
@@ -30,20 +34,39 @@ public class UserSocketIO {
 
             SocketIONamespace executorNameSpace = socketIOServer.getNamespace("/executor");
 
-            BroadcastOperations broadcastOperations = executorNameSpace.getBroadcastOperations();
+            BroadcastOperations room = executorNameSpace.getRoomOperations(ActiveClientConcurrentHashMap.roomUUID.toString());
 
-            broadcastOperations.sendEvent("#order-1", client, data);
+            room.sendEvent("#order-1", client, data);
 
             ackSender.sendAckData("Message to user send successfully");
         };
     }
 
     private void onConnect(SocketIOClient client) {
-        log.info("USER: [{}] CONNECTED TO NAMESPACE: [{}]", client.getSessionId(), client.getNamespace().getName());
+        hashMap.addClient("user-login", client);
+
+        client.joinRoom(ActiveClientConcurrentHashMap.roomUUID.toString());
+
+        log.info("Client rooms: {}", client.getNamespace()
+                .getBroadcastOperations()
+                .getClients()
+                .stream()
+                .filter(client1 -> client1.getSessionId().equals(client1.getSessionId()))
+                .findAny()
+                .orElseThrow()
+                .getAllRooms());
+
+        log.info("USER: [{}] CONNECTED TO ROOM: [{}], NAMESPACE: [{}] ",
+                client.getSessionId(),
+                ActiveClientConcurrentHashMap.roomUUID.toString(),
+                client.getNamespace().getName()
+        );
     }
 
     public void onDisconnect(SocketIOClient client) {
-        log.info("USER [{}] DISCONNECTED FROM ROOM: [{}] NAMESPACE: [{}]",
-                client.getSessionId(), client.getAllRooms(), client.getNamespace().getName());
+        hashMap.removeClient("user-login");
+
+        client.leaveRoom(ActiveClientConcurrentHashMap.roomUUID.toString());
+        log.info("USER [{}] DISCONNECTED FROM ROOM: [{}] NAMESPACE: [{}]", client.getSessionId(), client.getAllRooms(), client.getNamespace().getName());
     }
 }
